@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "x402-k8s-operator.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "x402-k8s-operator.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "x402-k8s-operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "x402-k8s-operator.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "x402-k8s-operator.fullname" . }}
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: manager
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /manager
+          args:
+            - --leader-elect={{ .Values.leaderElection.enabled }}
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+            - name: health
+              containerPort: 8081
+              protocol: TCP
+            - name: gateway
+              containerPort: 8402
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OPERATOR_SERVICE_NAME
+              value: {{ include "x402-k8s-operator.fullname" . }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

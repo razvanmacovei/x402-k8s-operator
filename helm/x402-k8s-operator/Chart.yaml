@@ -1,0 +1,45 @@
+apiVersion: v2
+name: x402-k8s-operator
+description: Kubernetes operator that monetizes any API with per-request payments via the x402 protocol
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+home: https://github.com/razvanmacovei/x402-k8s-operator
+sources:
+  - https://github.com/razvanmacovei/x402-k8s-operator
+keywords:
+  - x402
+  - payments
+  - api-monetization
+  - kubernetes
+  - operator
+  - web3
+  - ingress
+  - paywall
+maintainers:
+  - name: razvanmacovei
+    url: https://github.com/razvanmacovei
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/operator: "true"
+  artifacthub.io/operatorCapabilities: Basic Install
+  artifacthub.io/crds: |
+    - kind: X402Route
+      version: v1alpha1
+      name: x402routes.x402.io
+      displayName: X402 Route
+      description: Defines per-path payment rules for an Ingress resource
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://github.com/razvanmacovei/x402-k8s-operator/blob/main/README.md
+    - name: x402 Protocol
+      url: https://x402.org
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release with single-binary operator and gateway
+    - kind: added
+      description: X402Route CRD with per-path pricing and conditional payment modes
+    - kind: added
+      description: Prometheus metrics for payment tracking
+    - kind: added
+      description: x402 V2 protocol support

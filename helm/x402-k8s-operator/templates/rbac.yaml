@@ -1,0 +1,49 @@
+{{- if .Values.rbac.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "x402-k8s-operator.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "x402-k8s-operator.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "x402-k8s-operator.fullname" . }}-role
+rules:
+  - apiGroups: ["x402.io"]
+    resources: ["x402routes"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["x402.io"]
+    resources: ["x402routes/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: ["x402.io"]
+    resources: ["x402routes/finalizers"]
+    verbs: ["update"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "x402-k8s-operator.fullname" . }}-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "x402-k8s-operator.fullname" . }}-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "x402-k8s-operator.fullname" . }}
+    namespace: {{ .Values.namespace }}
+{{- end }}

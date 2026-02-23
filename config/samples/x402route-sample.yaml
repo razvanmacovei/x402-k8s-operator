@@ -1,0 +1,21 @@
+apiVersion: x402.io/v1alpha1
+kind: X402Route
+metadata:
+  name: my-api-payments
+  namespace: default
+spec:
+  ingressRef:
+    name: my-api-ingress
+    namespace: default
+  payment:
+    wallet: "0x1f6004907Adc7d313768b85917e069e011150390"
+    network: base-sepolia
+    defaultPrice: "0.001"
+    facilitatorURL: http://mock-facilitator:8080
+  routes:
+    - path: "/api/*"
+      # inherits defaultPrice, mode defaults to all-pay
+    - path: "/health"
+      free: true
+    - path: "/docs"
+      free: true

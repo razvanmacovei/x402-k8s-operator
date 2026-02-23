@@ -1,0 +1,13 @@
+FROM golang:1.23-alpine AS builder
+WORKDIR /workspace
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd/mock-facilitator/ cmd/mock-facilitator/
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o facilitator ./cmd/mock-facilitator/
+
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /workspace/facilitator /facilitator
+USER 65532:65532
+EXPOSE 8080
+ENTRYPOINT ["/facilitator"]

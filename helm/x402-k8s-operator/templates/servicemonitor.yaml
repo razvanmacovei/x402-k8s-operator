@@ -1,0 +1,17 @@
+{{- if and .Values.metrics.enabled .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "x402-k8s-operator.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "x402-k8s-operator.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "x402-k8s-operator.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      path: /metrics
+{{- end }}

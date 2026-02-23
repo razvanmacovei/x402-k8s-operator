@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "x402-k8s-operator.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "x402-k8s-operator.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "x402-k8s-operator.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: gateway
+      port: 8402
+      targetPort: gateway
+      protocol: TCP
+    {{- if .Values.metrics.enabled }}
+    - name: metrics
+      port: 8080
+      targetPort: metrics
+      protocol: TCP
+    {{- end }}

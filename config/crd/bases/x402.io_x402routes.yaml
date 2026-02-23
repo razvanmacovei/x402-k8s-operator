@@ -1,0 +1,189 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: x402routes.x402.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.1
+spec:
+  group: x402.io
+  names:
+    kind: X402Route
+    listKind: X402RouteList
+    plural: x402routes
+    singular: x402route
+    shortNames:
+      - x4r
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      additionalPrinterColumns:
+        - name: Ingress Patched
+          type: boolean
+          jsonPath: .status.ingressPatched
+        - name: Ready
+          type: boolean
+          jsonPath: .status.ready
+        - name: Active Routes
+          type: integer
+          jsonPath: .status.activeRoutes
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          description: X402Route is the Schema for the x402routes API.
+          type: object
+          properties:
+            apiVersion:
+              description: APIVersion defines the versioned schema of this representation of an object.
+              type: string
+            kind:
+              description: Kind is a string value representing the REST resource this object represents.
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: X402RouteSpec defines the desired state of X402Route.
+              type: object
+              required:
+                - ingressRef
+                - payment
+                - routes
+              properties:
+                ingressRef:
+                  description: Reference to the existing Ingress to patch with payment gating.
+                  type: object
+                  required:
+                    - name
+                  properties:
+                    name:
+                      description: Name of the Ingress resource.
+                      type: string
+                    namespace:
+                      description: Namespace of the Ingress. Defaults to the X402Route's namespace.
+                      type: string
+                payment:
+                  description: Global payment configuration.
+                  type: object
+                  required:
+                    - wallet
+                    - network
+                  properties:
+                    wallet:
+                      description: Wallet address to receive payments.
+                      type: string
+                    network:
+                      description: Blockchain network (e.g. "base", "base-sepolia").
+                      type: string
+                    defaultPrice:
+                      description: Default price for paid routes. Individual routes can override.
+                      type: string
+                    facilitatorURL:
+                      description: URL of the x402 facilitator service. Defaults to https://x402.org/facilitator.
+                      type: string
+                routes:
+                  description: Per-path pricing rules.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - path
+                    properties:
+                      path:
+                        description: "URL path pattern (supports * for single segment, ** for any depth)."
+                        type: string
+                      price:
+                        description: Price override for this specific path.
+                        type: string
+                      free:
+                        description: Marks this path as free (no payment required).
+                        type: boolean
+                      mode:
+                        description: "Payment mode: all-pay (default) or conditional."
+                        type: string
+                        enum:
+                          - all-pay
+                          - conditional
+                        default: all-pay
+                      conditions:
+                        description: Conditions for conditional payment evaluation.
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - header
+                            - pattern
+                            - action
+                          properties:
+                            header:
+                              description: HTTP header to inspect.
+                              type: string
+                            pattern:
+                              description: Regex pattern to match against the header value.
+                              type: string
+                            action:
+                              description: "Action when pattern matches: pay or free."
+                              type: string
+                              enum:
+                                - pay
+                                - free
+            status:
+              description: X402RouteStatus defines the observed state of X402Route.
+              type: object
+              properties:
+                ingressPatched:
+                  description: Whether the referenced Ingress has been patched.
+                  type: boolean
+                ready:
+                  description: Whether the route is fully active.
+                  type: boolean
+                activeRoutes:
+                  description: Number of active route rules.
+                  type: integer
+                conditions:
+                  description: Latest observations of the X402Route's state.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                      - lastTransitionTime
+                      - reason
+                      - message
+                    properties:
+                      type:
+                        description: Type of condition.
+                        type: string
+                        maxLength: 316
+                        pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      status:
+                        description: Status of the condition.
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      lastTransitionTime:
+                        description: Last time the condition transitioned from one status to another.
+                        type: string
+                        format: date-time
+                      reason:
+                        description: Machine-readable reason for the condition.
+                        type: string
+                        maxLength: 1024
+                        minLength: 1
+                        pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      message:
+                        description: Human-readable message indicating details.
+                        type: string
+                        maxLength: 32768
+                      observedGeneration:
+                        description: Represents the .metadata.generation that the condition was set based upon.
+                        type: integer
+                        format: int64
+                        minimum: 0
