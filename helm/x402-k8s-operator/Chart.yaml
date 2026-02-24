@@ -2,8 +2,8 @@ apiVersion: v2
 name: x402-k8s-operator
 description: Kubernetes operator that monetizes any API with per-request payments via the x402 protocol
 type: application
-version: 0.0.1
-appVersion: "0.0.1"
+version: 0.0.3
+appVersion: "0.0.3"
 home: https://github.com/razvanmacovei/x402-k8s-operator
 sources:
   - https://github.com/razvanmacovei/x402-k8s-operator
@@ -35,15 +35,9 @@ annotations:
     - name: x402 Protocol
       url: https://x402.org
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Fix startup panic caused by duplicate zap-devel flag registration
-    - kind: fixed
-      description: Gateway now filters routes by Host header to prevent cross-route interference
-    - kind: added
-      description: Host-based route matching in gateway for multi-tenant deployments
-    - kind: added
-      description: Configurable replicas via values.yaml
-    - kind: added
-      description: Optional namespace creation toggle (createNamespace)
-    - kind: added
-      description: Mock facilitator deployment manifest for testing
+    - kind: security
+      description: Upgrade Go 1.23 → 1.25 to fix 19 CVEs (1 critical, 6 high) from EOL stdlib
+    - kind: security
+      description: Upgrade controller-runtime v0.19.0 → v0.23.1 (fixes golang.org/x/net, x/oauth2 CVEs)
+    - kind: changed
+      description: Bump k8s.io/api, apimachinery, client-go from v0.31.0 to v0.35.0

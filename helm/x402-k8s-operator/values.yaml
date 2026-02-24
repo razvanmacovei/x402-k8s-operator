@@ -1,18 +1,51 @@
+# -- Number of operator pod replicas.
+# Enable leaderElection when running more than 1 replica.
 replicas: 1
 
 image:
+  # -- Container image repository
   repository: ghcr.io/razvanmacovei/x402-k8s-operator
-  tag: latest
+  # -- Container image tag (defaults to chart appVersion)
+  tag: ""
+  # -- Image pull policy
   pullPolicy: IfNotPresent
 
+# -- Secrets for pulling images from private registries
+imagePullSecrets: []
+# - name: my-registry-secret
+
+# -- Override the chart name
+nameOverride: ""
+# -- Override the full release name
+fullnameOverride: ""
+
+# -- Namespace where the operator is deployed
 namespace: x402-system
+# -- Create the namespace (set false if managed by Terraform or external tooling)
 createNamespace: true
 
 rbac:
+  # -- Create ServiceAccount, ClusterRole, and ClusterRoleBinding
   create: true
 
 leaderElection:
+  # -- Enable leader election for HA deployments (required when replicas > 1)
   enabled: false
+
+# -- Pod-level security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+# -- Container-level security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 
 resources:
   limits:
@@ -22,9 +55,42 @@ resources:
     cpu: 100m
     memory: 64Mi
 
+# -- Node selector for pod scheduling
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling
+tolerations: []
+
+# -- Affinity rules for pod scheduling
+affinity: {}
+
+# -- Topology spread constraints for pod distribution
+topologySpreadConstraints: []
+
+# -- Additional pod annotations (e.g. for Prometheus scraping)
+podAnnotations: {}
+
+# -- Additional pod labels
+podLabels: {}
+
+# -- Termination grace period in seconds
+terminationGracePeriodSeconds: 10
+
+# -- Pod priority class name
+priorityClassName: ""
+
+gateway:
+  # -- Gateway proxy port
+  port: 8402
+
 metrics:
+  # -- Expose Prometheus metrics on :8080/metrics
   enabled: true
 
 serviceMonitor:
+  # -- Create a Prometheus ServiceMonitor (requires prometheus-operator CRDs)
   enabled: false
+  # -- Scrape interval
   interval: 30s
+  # -- Additional labels for the ServiceMonitor (e.g. release: kube-prometheus-stack)
+  labels: {}
