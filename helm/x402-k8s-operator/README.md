@@ -152,4 +152,4 @@ Client → Ingress Controller → x402-operator :8402 → payment check → Back
 helm uninstall x402-k8s-operator
 ```
 
-> **Note:** Uninstalling the chart removes the operator but does not automatically restore patched Ingresses. Delete the X402Route resources first to trigger cleanup, then uninstall.
+> **Note:** Uninstalling the chart automatically deletes all X402Route resources and restores patched Ingresses to their original backends via a pre-delete hook.

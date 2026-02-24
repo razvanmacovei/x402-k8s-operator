@@ -413,6 +413,12 @@ func (r *X402RouteReconciler) pathMatchesPaidRoutes(ingressPath string, paidPath
 		if cleanPaid != "/" && strings.HasPrefix(cleanIngress, cleanPaid+"/") {
 			return true
 		}
+		// A catch-all Ingress path (e.g. "/") is a superset of any paid path
+		// (e.g. "/api/*"), so it should be redirected through the gateway.
+		// The gateway handles free vs paid routing decisions.
+		if cleanIngress == "/" || strings.HasPrefix(cleanPaid, cleanIngress+"/") {
+			return true
+		}
 		if ingressPath == paid {
 			return true
 		}

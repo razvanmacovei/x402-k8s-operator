@@ -1,6 +1,6 @@
 # x402-k8s-operator
 
-[![Go](https://img.shields.io/badge/Go-1.23-00ADD8?logo=go&logoColor=white)](https://go.dev)
+[![Go](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white)](https://go.dev)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/x402-k8s-operator)](https://artifacthub.io/packages/helm/x402-k8s-operator/x402-k8s-operator)
 [![Release](https://img.shields.io/github/v/release/razvanmacovei/x402-k8s-operator)](https://github.com/razvanmacovei/x402-k8s-operator/releases)
@@ -189,7 +189,7 @@ Client -> Ingress Controller -> x402-k8s-operator :8402 -> payment check -> Orig
 
 ## Local Development
 
-Prerequisites: Go 1.23+, Docker, a local Kubernetes cluster (docker-desktop, Kind, or Minikube).
+Prerequisites: Go 1.25+, Docker, a local Kubernetes cluster (docker-desktop, Kind, or Minikube).
 
 ```bash
 # Build the manager binary
