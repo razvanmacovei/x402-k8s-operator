@@ -14,7 +14,6 @@ If you discover a security vulnerability in x402-k8s-operator, please report it 
 
 Instead, please send a report to:
 
-- Email: **security@x402.io** (or open a private security advisory on GitHub)
 - GitHub Security Advisory: [Report a vulnerability](https://github.com/razvanmacovei/x402-k8s-operator/security/advisories/new)
 
 ### What to include
