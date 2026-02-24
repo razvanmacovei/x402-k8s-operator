@@ -42,6 +42,8 @@ type PaymentDefaults struct {
 	// FacilitatorURL is the URL of the x402 facilitator service.
 	// Defaults to https://x402.org/facilitator.
 	// +optional
+	// +kubebuilder:validation:Pattern=`^https?://`
+	// +kubebuilder:validation:MaxLength=2048
 	FacilitatorURL string `json:"facilitatorURL,omitempty"`
 }
 

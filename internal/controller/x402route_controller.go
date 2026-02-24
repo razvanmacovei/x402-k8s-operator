@@ -159,6 +159,10 @@ func (r *X402RouteReconciler) compileRoute(route *x402v1alpha1.X402Route, backen
 		facilitatorURL = "https://x402.org/facilitator"
 	}
 
+	if err := validateFacilitatorURL(facilitatorURL); err != nil {
+		return nil, fmt.Errorf("invalid facilitator URL %q: %w", facilitatorURL, err)
+	}
+
 	compiled := &routestore.CompiledRoute{
 		Name:           route.Name,
 		Namespace:      route.Namespace,

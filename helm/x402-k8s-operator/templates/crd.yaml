@@ -83,6 +83,8 @@ spec:
                     facilitatorURL:
                       description: URL of the x402 facilitator service.
                       type: string
+                      maxLength: 2048
+                      pattern: '^https?://'
                 routes:
                   description: Per-path pricing rules.
                   type: array
