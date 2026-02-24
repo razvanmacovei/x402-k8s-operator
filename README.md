@@ -127,7 +127,7 @@ spec:
 | `ingressRef.name` | `string` | yes | Name of the existing Ingress to patch |
 | `ingressRef.namespace` | `string` | no | Namespace of the Ingress (defaults to X402Route's ns) |
 | `payment.wallet` | `string` | yes | Wallet address to receive payments |
-| `payment.network` | `string` | yes | Blockchain network: `base` or `base-sepolia` |
+| `payment.network` | `string` | yes | Blockchain network (see [Networks](#networks) table) |
 | `payment.defaultPrice` | `string` | no | Default price for paid routes (e.g. `"0.001"`) |
 | `payment.facilitatorURL` | `string` | no | Facilitator URL (defaults to `https://x402.org/facilitator`) |
 | `routes[].path` | `string` | yes | Path pattern (`*` = one segment, `**` = any depth) |
@@ -168,11 +168,14 @@ The controller watches X402Route CRDs and writes compiled routes to an **in-memo
 Client -> Ingress Controller -> x402-k8s-operator :8402 -> payment check -> Original Backend
 ```
 
-### Payment Headers (x402 V2)
+### Payment Protocol (x402)
 
-- **Request**: `Payment-Signature` header (falls back to `X-Payment` for V1 compat)
-- **402 Response**: `Payment-Required: x402` header + JSON body with payment requirements
-- **200 Response**: `Payment-Response: accepted` header
+Implements the [x402 specification](https://github.com/coinbase/x402/blob/main/specs/x402-specification-v2.md), compatible with the official Coinbase CDP facilitator.
+
+- **Request**: `Payment-Signature` header (Base64-encoded JSON payload; falls back to `X-Payment` for compat)
+- **402 Response**: `PAYMENT-REQUIRED` header (Base64-encoded JSON) + JSON body (`resource` object, `amount` in atomic units, `extra` asset metadata)
+- **200 Response**: `PAYMENT-RESPONSE` header (Base64-encoded JSON with transaction hash, network, payer)
+- **Facilitator flow**: Gateway POSTs `{paymentPayload, paymentRequirements}` to `/verify`, then `/settle` on success
 
 ### Prometheus Metrics
 
@@ -233,7 +236,7 @@ The test client sends two requests:
 
 ## Production
 
-For production, use **Base mainnet** with a real USDC wallet:
+For production, use a mainnet network with a real USDC wallet:
 
 ```yaml
 payment:
@@ -242,10 +245,18 @@ payment:
   defaultPrice: "0.01"
 ```
 
-| Network | Chain | USDC Contract |
+### Networks
+
+| Network | Chain ID | USDC Contract |
 |---|---|---|
-| `base` | Base mainnet | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
-| `base-sepolia` | Base Sepolia testnet | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
+| `base` | eip155:8453 | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| `base-sepolia` | eip155:84532 | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
+| `avalanche` | eip155:43114 | `0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E` |
+| `avalanche-fuji` | eip155:43113 | `0x5425890298aed601595a70AB815c96711a31Bc65` |
+| `solana` | solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| `solana-devnet` | solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+
+Prices are human-readable (e.g. `"0.001"` USDC) and automatically converted to atomic units.
 
 ---
 

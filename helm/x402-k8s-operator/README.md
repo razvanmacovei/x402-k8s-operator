@@ -107,9 +107,17 @@ Traffic flow:
 ```
 Client → Ingress Controller → x402-operator :8402 → payment check → Backend
                                     ↓
-                              402 if no payment
-                              200 if paid (verified via facilitator)
+                              402 if no payment (PAYMENT-REQUIRED header)
+                              200 if paid (verify + settle via facilitator, PAYMENT-RESPONSE header)
 ```
+
+### Payment Protocol (x402)
+
+The operator implements the [x402 specification](https://github.com/coinbase/x402/blob/main/specs/x402-specification-v2.md) and is compatible with the official Coinbase CDP facilitator.
+
+- **No payment**: Returns `402` with a JSON body and a `PAYMENT-REQUIRED` header (Base64-encoded JSON) containing the payment requirements — `resource` object, `accepts` array with amount in atomic units, and `extra` asset metadata.
+- **With payment**: Client sends a `Payment-Signature` header (Base64-encoded JSON payload). The gateway decodes it and POSTs `{paymentPayload, paymentRequirements}` to the facilitator's `/verify` endpoint, then `/settle` on success. The response includes a `PAYMENT-RESPONSE` header (Base64-encoded settle result with transaction hash and network).
+- Prices in the CRD are human-readable (e.g. `"0.001"` USDC) and automatically converted to atomic units (e.g. `"1000"` for 6-decimal USDC).
 
 ## CRD Reference
 
@@ -120,7 +128,7 @@ Client → Ingress Controller → x402-operator :8402 → payment check → Back
 | `ingressRef.name` | string | yes | Ingress to patch |
 | `ingressRef.namespace` | string | no | Ingress namespace (defaults to X402Route's namespace) |
 | `payment.wallet` | string | yes | Wallet address to receive payments |
-| `payment.network` | string | yes | `base` (mainnet) or `base-sepolia` (testnet) |
+| `payment.network` | string | yes | Blockchain network (see [Networks](#networks) table) |
 | `payment.defaultPrice` | string | no | Default price in USDC (e.g. `"0.001"`) |
 | `payment.facilitatorURL` | string | no | Facilitator URL (defaults to `https://x402.org/facilitator`) |
 | `routes[].path` | string | yes | Path pattern (`*` = one segment, `**` = any depth) |
@@ -145,6 +153,10 @@ Client → Ingress Controller → x402-operator :8402 → payment check → Back
 |---------|----------|---------------|
 | `base` | eip155:8453 | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
 | `base-sepolia` | eip155:84532 | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
+| `avalanche` | eip155:43114 | `0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E` |
+| `avalanche-fuji` | eip155:43113 | `0x5425890298aed601595a70AB815c96711a31Bc65` |
+| `solana` | solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| `solana-devnet` | solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
 
 ## Uninstall
 

@@ -10,14 +10,24 @@ import (
 	"time"
 )
 
+// facilitatorRequest is the request format from the gateway.
+type facilitatorRequest struct {
+	PaymentPayload      json.RawMessage `json:"paymentPayload"`
+	PaymentRequirements json.RawMessage `json:"paymentRequirements"`
+}
+
 type verifyResponse struct {
-	Valid              bool   `json:"valid"`
-	InvalidationReason *string `json:"invalidationReason"`
+	IsValid       bool   `json:"isValid"`
+	InvalidReason string `json:"invalidReason,omitempty"`
+	Payer         string `json:"payer,omitempty"`
 }
 
 type settleResponse struct {
-	Success bool   `json:"success"`
-	TxHash  string `json:"txHash"`
+	Success     bool   `json:"success"`
+	ErrorReason string `json:"errorReason,omitempty"`
+	Payer       string `json:"payer,omitempty"`
+	Transaction string `json:"transaction,omitempty"`
+	Network     string `json:"network,omitempty"`
 }
 
 func main() {
@@ -39,10 +49,15 @@ func main() {
 			"time", time.Now().Format(time.RFC3339),
 		)
 
+		var req facilitatorRequest
+		if err := json.Unmarshal(body, &req); err != nil {
+			slog.Warn("invalid request body", "error", err)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(verifyResponse{
-			Valid:              true,
-			InvalidationReason: nil,
+			IsValid: true,
+			Payer:   "0x0000000000000000000000000000000000000001",
 		})
 	})
 
@@ -57,10 +72,17 @@ func main() {
 			"time", time.Now().Format(time.RFC3339),
 		)
 
+		var req facilitatorRequest
+		if err := json.Unmarshal(body, &req); err != nil {
+			slog.Warn("invalid request body", "error", err)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(settleResponse{
-			Success: true,
-			TxHash:  "0xmocktx123",
+			Success:     true,
+			Payer:       "0x0000000000000000000000000000000000000001",
+			Transaction: "0xmocktx123abc456def789",
+			Network:     "eip155:84532",
 		})
 	})
 

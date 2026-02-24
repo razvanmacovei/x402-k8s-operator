@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Single-binary Kubernetes operator with integrated payment gateway
 - `X402Route` Custom Resource Definition (CRD) with per-path pricing
 - Conditional payment mode with header-based regex matching
-- x402 V2 protocol support (`Payment-Signature` / `Payment-Required` headers)
-- Backward compatibility with x402 V1 (`X-Payment` header)
+- x402 protocol support (`Payment-Signature` / `PAYMENT-REQUIRED` / `PAYMENT-RESPONSE` headers)
+- Backward compatibility with `X-Payment` header
 - Prometheus metrics: request counters, payment amounts, verification latency, proxy latency
 - Helm chart with ArtifactHub annotations
 - Works with any Ingress controller via standard `networking.k8s.io/v1` Ingress API

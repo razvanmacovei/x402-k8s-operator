@@ -1,6 +1,8 @@
 package gateway
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -70,28 +72,34 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Verify payment with facilitator.
+		// Build payment requirements for facilitator request.
+		paymentReqs, err := buildPaymentRequirements(r, route, rule.Price)
+		if err != nil {
+			slog.Error("failed to build payment requirements", "path", path, "route", route.Name, "error", err)
+			http.Error(w, "internal error building payment requirements", http.StatusInternalServerError)
+			return
+		}
+
+		// Verify and settle payment with facilitator.
 		verifyStart := time.Now()
-		valid, err := verifyPayment(paymentHeader, r.URL.String(), route.FacilitatorURL)
+		settleResp, err := verifyAndSettlePayment(paymentHeader, paymentReqs, route.FacilitatorURL)
 		metrics.PaymentVerificationDuration.Observe(time.Since(verifyStart).Seconds())
 
 		if err != nil {
-			slog.Error("payment verification failed", "path", path, "route", route.Name, "error", err)
+			slog.Error("payment verification/settlement failed", "path", path, "route", route.Name, "error", err)
 			metrics.RequestsTotal.WithLabelValues(path, route.Namespace, route.Name, "verification_error").Inc()
 			writePaymentRequired(w, r, route, rule.Price)
 			return
 		}
 
-		if !valid {
-			slog.Info("payment invalid", "path", path, "route", route.Name)
-			metrics.RequestsTotal.WithLabelValues(path, route.Namespace, route.Name, "payment_invalid").Inc()
-			writePaymentRequired(w, r, route, rule.Price)
-			return
+		slog.Info("payment verified and settled, forwarding", "path", path, "route", route.Name)
+		metrics.RequestsTotal.WithLabelValues(path, route.Namespace, route.Name, "payment_accepted").Inc()
+
+		// Set PAYMENT-RESPONSE header as Base64-encoded settle response JSON.
+		if settleJSON, err := json.Marshal(settleResp); err == nil {
+			w.Header().Set("PAYMENT-RESPONSE", base64.StdEncoding.EncodeToString(settleJSON))
 		}
 
-		slog.Info("payment verified, forwarding", "path", path, "route", route.Name)
-		metrics.RequestsTotal.WithLabelValues(path, route.Namespace, route.Name, "payment_accepted").Inc()
-		w.Header().Set("Payment-Response", "accepted")
 		proxyToBackend(w, r, route, path)
 		metrics.ProxyRequestDuration.Observe(time.Since(start).Seconds())
 		return

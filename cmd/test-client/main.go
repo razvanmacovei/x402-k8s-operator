@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,7 +32,21 @@ func main() {
 
 	fmt.Printf("Status: %d %s\n", resp.StatusCode, resp.Status)
 	fmt.Printf("Content-Type: %s\n", resp.Header.Get("Content-Type"))
-	fmt.Printf("Payment-Required: %s\n", resp.Header.Get("Payment-Required"))
+
+	// Decode PAYMENT-REQUIRED Base64 header.
+	if payReqHeader := resp.Header.Get("PAYMENT-REQUIRED"); payReqHeader != "" {
+		fmt.Printf("PAYMENT-REQUIRED header (Base64): %s...\n", truncate(payReqHeader, 60))
+		if decoded, err := base64.StdEncoding.DecodeString(payReqHeader); err == nil {
+			var pretty json.RawMessage
+			if json.Unmarshal(decoded, &pretty) == nil {
+				indented, _ := json.MarshalIndent(pretty, "  ", "  ")
+				fmt.Printf("PAYMENT-REQUIRED (decoded):\n  %s\n", string(indented))
+			}
+		} else {
+			fmt.Printf("PAYMENT-REQUIRED header decode error: %v\n", err)
+		}
+	}
+
 	fmt.Printf("Body:\n%s\n\n", string(body))
 
 	if resp.StatusCode != http.StatusPaymentRequired {
@@ -40,7 +55,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Step 2: Send request with a mock payment header (V2: Payment-Signature).
+	// Step 2: Send request with a mock payment header (Payment-Signature).
 	fmt.Println("--- Step 2: Request with mock payment (Payment-Signature header) ---")
 
 	fakePayload := `{"scheme":"exact","network":"eip155:84532","payload":{"signature":"0xdeadbeef","authorization":{"from":"0x0000000000000000000000000000000000000001","to":"0x1f6004907Adc7d313768b85917e069e011150390","value":"1000","validAfter":"0","validBefore":"999999999999","nonce":"0x01"}}}`
@@ -53,7 +68,7 @@ func main() {
 	}
 	req.Header.Set("Payment-Signature", paymentHeader)
 
-	fmt.Printf("Payment-Signature: %s...\n", paymentHeader[:60])
+	fmt.Printf("Payment-Signature: %s...\n", truncate(paymentHeader, 60))
 
 	resp2, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -65,7 +80,21 @@ func main() {
 
 	fmt.Printf("Status: %d %s\n", resp2.StatusCode, resp2.Status)
 	fmt.Printf("Content-Type: %s\n", resp2.Header.Get("Content-Type"))
-	fmt.Printf("Payment-Response: %s\n", resp2.Header.Get("Payment-Response"))
+
+	// Decode PAYMENT-RESPONSE Base64 header.
+	if payRespHeader := resp2.Header.Get("PAYMENT-RESPONSE"); payRespHeader != "" {
+		fmt.Printf("PAYMENT-RESPONSE header (Base64): %s...\n", truncate(payRespHeader, 60))
+		if decoded, err := base64.StdEncoding.DecodeString(payRespHeader); err == nil {
+			var pretty json.RawMessage
+			if json.Unmarshal(decoded, &pretty) == nil {
+				indented, _ := json.MarshalIndent(pretty, "  ", "  ")
+				fmt.Printf("PAYMENT-RESPONSE (decoded):\n  %s\n", string(indented))
+			}
+		} else {
+			fmt.Printf("PAYMENT-RESPONSE header decode error: %v\n", err)
+		}
+	}
+
 	fmt.Printf("Body:\n%s\n\n", string(body2))
 
 	if resp2.StatusCode == http.StatusOK {
@@ -73,4 +102,11 @@ func main() {
 	} else {
 		fmt.Printf("Unexpected status %d. Check the facilitator and gateway logs.\n", resp2.StatusCode)
 	}
+}
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n]
 }

@@ -2,8 +2,8 @@ apiVersion: v2
 name: x402-k8s-operator
 description: Kubernetes operator that monetizes any API with per-request payments via the x402 protocol
 type: application
-version: 0.0.4
-appVersion: "0.0.4"
+version: 0.0.5
+appVersion: "0.0.5"
 home: https://github.com/razvanmacovei/x402-k8s-operator
 sources:
   - https://github.com/razvanmacovei/x402-k8s-operator
@@ -22,7 +22,7 @@ maintainers:
 annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/operator: "true"
-  artifacthub.io/operatorCapabilities: Basic Install
+  artifacthub.io/operatorCapabilities: Seamless Upgrades
   artifacthub.io/crds: |
     - kind: X402Route
       version: v1alpha1
@@ -35,7 +35,9 @@ annotations:
     - name: x402 Protocol
       url: https://x402.org
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Fix Ingress patching when catch-all path "/" exists and paid paths are subpaths (e.g. /api/*)
+    - kind: changed
+      description: "x402 protocol compliance: verify+settle flow, Base64-encoded PAYMENT-REQUIRED/PAYMENT-RESPONSE headers, atomic unit pricing, resource object in 402 body"
     - kind: added
-      description: Add pathMatchesPaidRoutes unit tests
+      description: "Network support for Avalanche (mainnet + Fuji) and Solana (mainnet + devnet)"
+    - kind: added
+      description: "Unit tests for humanToAtomicUnits, buildPaymentRequirements, writePaymentRequired"
