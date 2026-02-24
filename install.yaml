@@ -326,7 +326,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: manager
-          image: ghcr.io/razvanmacovei/x402-k8s-operator:latest
+          image: ghcr.io/razvanmacovei/x402-k8s-operator:0.0.3
           command:
             - /manager
           env:
