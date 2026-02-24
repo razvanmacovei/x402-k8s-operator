@@ -35,11 +35,15 @@ annotations:
     - name: x402 Protocol
       url: https://x402.org
   artifacthub.io/changes: |
+    - kind: fixed
+      description: Fix startup panic caused by duplicate zap-devel flag registration
+    - kind: fixed
+      description: Gateway now filters routes by Host header to prevent cross-route interference
     - kind: added
-      description: Initial release with single-binary operator and gateway
+      description: Host-based route matching in gateway for multi-tenant deployments
     - kind: added
-      description: X402Route CRD with per-path pricing and conditional payment modes
+      description: Configurable replicas via values.yaml
     - kind: added
-      description: Prometheus metrics for payment tracking
+      description: Optional namespace creation toggle (createNamespace)
     - kind: added
-      description: x402 V2 protocol support
+      description: Mock facilitator deployment manifest for testing

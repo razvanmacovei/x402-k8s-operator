@@ -6,6 +6,7 @@ import "regexp"
 type CompiledRoute struct {
 	Name           string
 	Namespace      string
+	Hosts          []string // hostnames from the associated Ingress rules
 	Wallet         string
 	Network        string
 	FacilitatorURL string

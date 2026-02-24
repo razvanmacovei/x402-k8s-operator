@@ -44,10 +44,7 @@ func main() {
 	flag.StringVar(&operatorNamespace, "operator-namespace", envOrDefault("POD_NAMESPACE", "x402-system"), "Namespace where the operator runs.")
 	flag.StringVar(&operatorSvcName, "operator-service-name", envOrDefault("OPERATOR_SERVICE_NAME", "x402-k8s-operator"), "Service name of the operator.")
 
-	var devMode bool
-	flag.BoolVar(&devMode, "zap-devel", false, "Enable development mode logging (more verbose).")
-
-	opts := zap.Options{Development: devMode}
+	opts := zap.Options{}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 

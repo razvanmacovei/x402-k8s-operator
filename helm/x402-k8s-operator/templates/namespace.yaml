@@ -1,6 +1,8 @@
+{{- if .Values.createNamespace }}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.namespace }}
   labels:
     {{- include "x402-k8s-operator.labels" . | nindent 4 }}
+{{- end }}

@@ -112,7 +112,7 @@ func (r *X402RouteReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	backends := r.extractBackends(ingress)
 
 	// Step 2: Compile CRD rules into route store.
-	compiled, err := r.compileRoute(&route, backends)
+	compiled, err := r.compileRoute(&route, backends, ingress)
 	if err != nil {
 		logger.Error(err, "failed to compile route rules")
 		r.setCondition(&route, "Ready", metav1.ConditionFalse, "CompileError", err.Error())
@@ -153,7 +153,7 @@ func (r *X402RouteReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 }
 
 // compileRoute converts CRD route rules into a CompiledRoute for the gateway.
-func (r *X402RouteReconciler) compileRoute(route *x402v1alpha1.X402Route, backends map[string]string) (*routestore.CompiledRoute, error) {
+func (r *X402RouteReconciler) compileRoute(route *x402v1alpha1.X402Route, backends map[string]string, ingress *networkingv1.Ingress) (*routestore.CompiledRoute, error) {
 	facilitatorURL := route.Spec.Payment.FacilitatorURL
 	if facilitatorURL == "" {
 		facilitatorURL = "https://x402.org/facilitator"
@@ -163,9 +163,18 @@ func (r *X402RouteReconciler) compileRoute(route *x402v1alpha1.X402Route, backen
 		return nil, fmt.Errorf("invalid facilitator URL %q: %w", facilitatorURL, err)
 	}
 
+	// Extract hosts from ingress rules.
+	var hosts []string
+	for _, rule := range ingress.Spec.Rules {
+		if rule.Host != "" {
+			hosts = append(hosts, rule.Host)
+		}
+	}
+
 	compiled := &routestore.CompiledRoute{
 		Name:           route.Name,
 		Namespace:      route.Namespace,
+		Hosts:          hosts,
 		Wallet:         route.Spec.Payment.Wallet,
 		Network:        route.Spec.Payment.Network,
 		FacilitatorURL: facilitatorURL,

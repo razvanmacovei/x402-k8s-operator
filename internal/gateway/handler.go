@@ -3,6 +3,7 @@ package gateway
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/razvanmacovei/x402-k8s-operator/internal/metrics"
@@ -24,9 +25,17 @@ func NewHandler(store *routestore.Store) *Handler {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	path := r.URL.Path
+	host := r.Host
+	// Strip port from host if present.
+	if idx := strings.LastIndex(host, ":"); idx != -1 {
+		host = host[:idx]
+	}
 	routes := h.store.Snapshot()
 
 	for _, route := range routes {
+		if !h.matchesHost(host, route) {
+			continue
+		}
 		rule, matched := h.findMatchingRule(path, route)
 		if !matched {
 			continue
@@ -91,6 +100,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// No route matched.
 	slog.Info("no matching route", "path", path)
 	http.Error(w, "no x402 route configured for this path", http.StatusNotFound)
+}
+
+// matchesHost checks if the request host matches any host in the route.
+// If the route has no hosts configured, it matches any host.
+func (h *Handler) matchesHost(host string, route *routestore.CompiledRoute) bool {
+	if len(route.Hosts) == 0 {
+		return true
+	}
+	for _, rh := range route.Hosts {
+		if strings.EqualFold(rh, host) {
+			return true
+		}
+	}
+	return false
 }
 
 // findMatchingRule finds the first rule in a route that matches the given path.

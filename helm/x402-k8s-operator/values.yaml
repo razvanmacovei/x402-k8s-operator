@@ -1,9 +1,12 @@
+replicas: 1
+
 image:
   repository: ghcr.io/razvanmacovei/x402-k8s-operator
   tag: latest
   pullPolicy: IfNotPresent
 
 namespace: x402-system
+createNamespace: true
 
 rbac:
   create: true

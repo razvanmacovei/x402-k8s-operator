@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "x402-k8s-operator.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicas | default 1 }}
   selector:
     matchLabels:
       {{- include "x402-k8s-operator.selectorLabels" . | nindent 6 }}
