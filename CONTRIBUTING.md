@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ### Prerequisites
 
-- Go 1.23+
+- Go 1.25+
 - Docker
 - A local Kubernetes cluster (docker-desktop, Kind, or Minikube)
 - kubectl
