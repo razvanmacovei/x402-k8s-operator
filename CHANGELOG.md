@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.6] - 2026-02-25
+
+### Fixed
+- Payment amount metric (`x402_payment_amount_total`) was never incremented — Grafana dashboard now correctly tracks revenue
+
+### Changed
+- x402 protocol compliance: verify+settle two-step flow with facilitator
+- `PAYMENT-REQUIRED` and `PAYMENT-RESPONSE` headers use Base64-encoded JSON
+- Prices converted to atomic units (e.g. "0.001" USDC → "1000") in 402 responses
+- Added `resource` object and `extra` field to payment requirements schema
+
+### Added
+- Avalanche (mainnet + Fuji) and Solana (mainnet + devnet) network support
+- Unit tests for price conversion, payment requirements, and 402 responses
+- Grafana dashboard JSON (`config/grafana/`)
+
 ## [0.0.1] - 2026-02-23
 
 ### Added

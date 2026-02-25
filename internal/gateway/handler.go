@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -94,6 +95,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		slog.Info("payment verified and settled, forwarding", "path", path, "route", route.Name)
 		metrics.RequestsTotal.WithLabelValues(path, route.Namespace, route.Name, "payment_accepted").Inc()
+		if amount, err := strconv.ParseFloat(rule.Price, 64); err == nil {
+			metrics.PaymentAmountTotal.WithLabelValues(path, route.Wallet, route.Network).Add(amount)
+		}
 
 		// Set PAYMENT-RESPONSE header as Base64-encoded settle response JSON.
 		if settleJSON, err := json.Marshal(settleResp); err == nil {
