@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/x402-k8s-operator)](https://artifacthub.io/packages/helm/x402-k8s-operator/x402-k8s-operator)
 [![Release](https://img.shields.io/github/v/release/razvanmacovei/x402-k8s-operator)](https://github.com/razvanmacovei/x402-k8s-operator/releases)
+[![Grafana Dashboard](https://img.shields.io/badge/Grafana-Dashboard-F46800?logo=grafana&logoColor=white)](https://grafana.com/grafana/dashboards/24921-x402-kubernetes-operator/)
 
 **Kubernetes operator that monetizes any API with per-request payments via the [x402 protocol](https://x402.org).**
 
@@ -187,6 +188,20 @@ Implements the [x402 specification](https://github.com/coinbase/x402/blob/main/s
 | `x402_proxy_request_duration_seconds` | histogram | Backend proxy latency |
 | `x402_active_routes` | gauge | Number of active routes |
 | `x402_route_store_updates_total` | counter | Route store update count |
+
+### Grafana Dashboard
+
+![Grafana Dashboard](docs/images/grafana-dashboard.png)
+
+Import the pre-built dashboard from [Grafana.com (ID: 24921)](https://grafana.com/grafana/dashboards/24921-x402-kubernetes-operator/) or auto-provision it via Helm:
+
+```yaml
+grafanaDashboard:
+  enabled: true
+  namespace: monitoring  # namespace where Grafana is deployed
+```
+
+The dashboard includes: request rate by status, revenue tracking, payment verification latency (p50/p95/p99), proxy latency, route table, and pod health.
 
 ---
 

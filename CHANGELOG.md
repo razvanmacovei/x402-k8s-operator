@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-02-25
+
+### Added
+- Grafana dashboard with 13 panels: request rate, revenue tracking, payment verification latency (p50/p95/p99), proxy latency, route table, and pod health
+- Helm chart auto-provisions dashboard via ConfigMap with `grafanaDashboard.enabled=true` (Grafana sidecar auto-discovery)
+- Published dashboard on [Grafana.com (ID: 24921)](https://grafana.com/grafana/dashboards/24921-x402-kubernetes-operator/)
+- Dashboard screenshot in README
+
+### Changed
+- Bumped to v0.1.0 — first minor release, all core features stable
+
 ## [0.0.6] - 2026-02-25
 
 ### Fixed

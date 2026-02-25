@@ -94,3 +94,12 @@ serviceMonitor:
   interval: 30s
   # -- Additional labels for the ServiceMonitor (e.g. release: kube-prometheus-stack)
   labels: {}
+
+grafanaDashboard:
+  # -- Create a ConfigMap with the Grafana dashboard (auto-discovered by Grafana sidecar)
+  enabled: false
+  # -- Additional labels for the dashboard ConfigMap
+  labels: {}
+  # -- Namespace to deploy the dashboard ConfigMap (defaults to operator namespace).
+  # Set to the Grafana namespace (e.g. "monitoring") if Grafana sidecar only watches its own namespace.
+  namespace: ""

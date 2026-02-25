@@ -2,8 +2,8 @@ apiVersion: v2
 name: x402-k8s-operator
 description: Kubernetes operator that monetizes any API with per-request payments via the x402 protocol
 type: application
-version: 0.0.6
-appVersion: "0.0.6"
+version: 0.1.0
+appVersion: "0.1.0"
 home: https://github.com/razvanmacovei/x402-k8s-operator
 sources:
   - https://github.com/razvanmacovei/x402-k8s-operator
@@ -35,9 +35,9 @@ annotations:
     - name: x402 Protocol
       url: https://x402.org
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Payment amount metric (x402_payment_amount_total) now correctly tracks revenue"
-    - kind: changed
-      description: "x402 protocol compliance: verify+settle flow, Base64-encoded headers, atomic unit pricing"
     - kind: added
-      description: "Network support for Avalanche and Solana"
+      description: "Grafana dashboard with 13 panels (auto-provisioned via Helm)"
+    - kind: added
+      description: "Published dashboard on Grafana.com (ID: 24921)"
+    - kind: added
+      description: "grafanaDashboard.enabled Helm value for sidecar auto-discovery"

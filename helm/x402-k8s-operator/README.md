@@ -91,6 +91,25 @@ routes:
 | `serviceMonitor.enabled` | bool | `false` | Create Prometheus ServiceMonitor |
 | `serviceMonitor.interval` | string | `30s` | Scrape interval |
 | `serviceMonitor.labels` | object | `{}` | Additional ServiceMonitor labels |
+| `grafanaDashboard.enabled` | bool | `false` | Create ConfigMap with Grafana dashboard (auto-discovered by sidecar) |
+| `grafanaDashboard.labels` | object | `{}` | Additional labels for the dashboard ConfigMap |
+| `grafanaDashboard.namespace` | string | `""` | Namespace for the ConfigMap (defaults to operator namespace) |
+
+## Grafana Dashboard
+
+![Grafana Dashboard](https://raw.githubusercontent.com/razvanmacovei/x402-k8s-operator/main/docs/images/grafana-dashboard.png)
+
+A pre-built dashboard is available on [Grafana.com (ID: 24921)](https://grafana.com/grafana/dashboards/24921-x402-kubernetes-operator/).
+
+To auto-provision it via the Grafana sidecar in kube-prometheus-stack:
+
+```yaml
+grafanaDashboard:
+  enabled: true
+  namespace: monitoring  # namespace where Grafana is deployed
+```
+
+This creates a ConfigMap with the label `grafana_dashboard: "1"` that the Grafana sidecar automatically detects and loads.
 
 ## Architecture
 
